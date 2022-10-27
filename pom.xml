@@ -25,7 +25,7 @@
     </parent>
     <groupId>org.apache.shardingsphere.elasticjob</groupId>
     <artifactId>elasticjob</artifactId>
-    <version>3.0.2</version>
+    <version>3.0.2-curator4x</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     
