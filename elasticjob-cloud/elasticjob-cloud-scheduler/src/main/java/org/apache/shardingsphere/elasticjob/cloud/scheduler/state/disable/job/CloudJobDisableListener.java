@@ -18,10 +18,10 @@
 package org.apache.shardingsphere.elasticjob.cloud.scheduler.state.disable.job;
 
 import org.apache.curator.framework.recipes.cache.ChildData;
-import org.apache.curator.framework.recipes.cache.CuratorCache;
-import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.shardingsphere.elasticjob.cloud.scheduler.producer.ProducerManager;
 import org.apache.shardingsphere.elasticjob.reg.base.CoordinatorRegistryCenter;
+import org.apache.shardingsphere.elasticjob.reg.zookeeper.CuratorCacheListener;
 
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
 /**
  * Cloud job disable listener.
  */
-public final class CloudJobDisableListener implements CuratorCacheListener {
+public final class CloudJobDisableListener extends CuratorCacheListener {
     
     private final CoordinatorRegistryCenter regCenter;
     
@@ -64,22 +64,22 @@ public final class CloudJobDisableListener implements CuratorCacheListener {
      * Start the listener service of the cloud job service.
      */
     public void start() {
-        getCache().listenable().addListener(this, Executors.newSingleThreadExecutor());
+        getCache().getListenable().addListener(this, Executors.newSingleThreadExecutor());
     }
     
     /**
      * Stop the listener service of the cloud job service.
      */
     public void stop() {
-        getCache().listenable().removeListener(this);
+        getCache().getListenable().removeListener(this);
     }
     
-    private CuratorCache getCache() {
-        CuratorCache result = (CuratorCache) regCenter.getRawCache(DisableJobNode.ROOT);
+    private TreeCache getCache() {
+        TreeCache result = (TreeCache) regCenter.getRawCache(DisableJobNode.ROOT);
         if (null != result) {
             return result;
         }
         regCenter.addCacheData(DisableJobNode.ROOT);
-        return (CuratorCache) regCenter.getRawCache(DisableJobNode.ROOT);
+        return (TreeCache) regCenter.getRawCache(DisableJobNode.ROOT);
     }
 }

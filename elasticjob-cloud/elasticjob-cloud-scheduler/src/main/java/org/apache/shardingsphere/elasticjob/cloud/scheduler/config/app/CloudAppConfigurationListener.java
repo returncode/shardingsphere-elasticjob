@@ -20,13 +20,13 @@ package org.apache.shardingsphere.elasticjob.cloud.scheduler.config.app;
 import com.google.gson.JsonParseException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.recipes.cache.ChildData;
-import org.apache.curator.framework.recipes.cache.CuratorCache;
-import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.mesos.Protos;
 import org.apache.shardingsphere.elasticjob.cloud.scheduler.mesos.MesosStateService;
 import org.apache.shardingsphere.elasticjob.cloud.scheduler.producer.ProducerManager;
 import org.apache.shardingsphere.elasticjob.infra.exception.JobSystemException;
 import org.apache.shardingsphere.elasticjob.reg.base.CoordinatorRegistryCenter;
+import org.apache.shardingsphere.elasticjob.reg.zookeeper.CuratorCacheListener;
 
 import java.util.Collection;
 import java.util.concurrent.Executors;
@@ -35,7 +35,7 @@ import java.util.concurrent.Executors;
  * Cloud app configuration change listener.
  */
 @Slf4j
-public final class CloudAppConfigurationListener implements CuratorCacheListener {
+public final class CloudAppConfigurationListener extends CuratorCacheListener {
     
     private final CoordinatorRegistryCenter regCenter;
     
@@ -66,23 +66,23 @@ public final class CloudAppConfigurationListener implements CuratorCacheListener
      * Start the listener service of the cloud job service.
      */
     public void start() {
-        getCache().listenable().addListener(this, Executors.newSingleThreadExecutor());
+        getCache().getListenable().addListener(this, Executors.newSingleThreadExecutor());
     }
     
     /**
      * Stop the listener service of the cloud job service.
      */
     public void stop() {
-        getCache().listenable().removeListener(this);
+        getCache().getListenable().removeListener(this);
     }
     
-    private CuratorCache getCache() {
-        CuratorCache result = (CuratorCache) regCenter.getRawCache(CloudAppConfigurationNode.ROOT);
+    private TreeCache getCache() {
+        TreeCache result = (TreeCache) regCenter.getRawCache(CloudAppConfigurationNode.ROOT);
         if (null != result) {
             return result;
         }
         regCenter.addCacheData(CloudAppConfigurationNode.ROOT);
-        return (CuratorCache) regCenter.getRawCache(CloudAppConfigurationNode.ROOT);
+        return (TreeCache) regCenter.getRawCache(CloudAppConfigurationNode.ROOT);
     }
     
     private void stopExecutors(final String appName) {

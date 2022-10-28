@@ -18,12 +18,12 @@
 package org.apache.shardingsphere.elasticjob.cloud.scheduler.state.disable.app;
 
 import org.apache.curator.framework.recipes.cache.ChildData;
-import org.apache.curator.framework.recipes.cache.CuratorCache;
-import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.shardingsphere.elasticjob.cloud.config.pojo.CloudJobConfigurationPOJO;
 import org.apache.shardingsphere.elasticjob.cloud.scheduler.config.job.CloudJobConfigurationService;
 import org.apache.shardingsphere.elasticjob.cloud.scheduler.producer.ProducerManager;
 import org.apache.shardingsphere.elasticjob.reg.base.CoordinatorRegistryCenter;
+import org.apache.shardingsphere.elasticjob.reg.zookeeper.CuratorCacheListener;
 
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
 /**
  * Cloud app disable listener.
  */
-public final class CloudAppDisableListener implements CuratorCacheListener {
+public final class CloudAppDisableListener extends CuratorCacheListener {
     
     private final CoordinatorRegistryCenter regCenter;
     
@@ -69,23 +69,23 @@ public final class CloudAppDisableListener implements CuratorCacheListener {
      * Start the listener service of the cloud job service.
      */
     public void start() {
-        getCache().listenable().addListener(this, Executors.newSingleThreadExecutor());
+        getCache().getListenable().addListener(this, Executors.newSingleThreadExecutor());
     }
     
     /**
      * Stop the listener service of the cloud job service.
      */
     public void stop() {
-        getCache().listenable().removeListener(this);
+        getCache().getListenable().removeListener(this);
     }
     
-    private CuratorCache getCache() {
-        CuratorCache result = (CuratorCache) regCenter.getRawCache(DisableAppNode.ROOT);
+    private TreeCache getCache() {
+        TreeCache result = (TreeCache) regCenter.getRawCache(DisableAppNode.ROOT);
         if (null != result) {
             return result;
         }
         regCenter.addCacheData(DisableAppNode.ROOT);
-        return (CuratorCache) regCenter.getRawCache(DisableAppNode.ROOT);
+        return (TreeCache) regCenter.getRawCache(DisableAppNode.ROOT);
     }
     
     private void disableApp(final String appName) {
